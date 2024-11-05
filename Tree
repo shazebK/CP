@@ -22,7 +22,7 @@ class Tree{
 
         dfs(1,0,tree,0);
 
-        pow2Parent[0][1] = 1;
+        pow2Parent[0][1] = 0;
 
         for(int i=1;i<=n;i++){
             for(int child : TREE[i]) pow2Parent[0][child] = i;
@@ -52,11 +52,9 @@ class Tree{
         if(x == y) return x;
 
         for(int i=31;i>=0;i--){
-            int xNthParent = NthParent(x,i);
-            int yNthParent = NthParent(y,i);
-            if(xNthParent != yNthParent){
-                x = xNthParent;
-                y = yNthParent;
+            if(pow2Parent[i][x] != pow2Parent[i][y]){
+                x = pow2Parent[i][x];
+                y = pow2Parent[i][y];
             }
         }
 
