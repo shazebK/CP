@@ -1,0 +1,70 @@
+class Tree{
+    public:
+    vector<int> depth;
+    vector<vector<int>> TREE;
+    vector<vector<int>> pow2Parent;
+
+    void dfs(int root,int parent,vector<vector<int>>& tree,int d){
+        depth[root] = d;
+        for(int child : tree[root]){
+            if(child == parent) continue;
+            TREE[root].push_back(child);
+            dfs(child,root,tree,d+1);
+        }
+    }
+
+    Tree(vector<vector<int>>& tree){
+        int n = tree.size()-1;
+
+        TREE.assign(n+1,vector<int>());
+        depth.assign(n+1,0);
+        pow2Parent.assign(32,vector<int>(n+1));
+
+        dfs(1,0,tree,0);
+
+        pow2Parent[0][1] = 1;
+
+        for(int i=1;i<=n;i++){
+            for(int child : TREE[i]) pow2Parent[0][child] = i;
+        }
+
+        for(int i=1;i<32;i++){
+            for(int j=1;j<=n;j++){
+                pow2Parent[i][j] = pow2Parent[i-1][pow2Parent[i-1][j]];
+            }
+        }
+    }
+
+    int NthParent(int x,int n){
+        for(int i=0;i<31;i++){
+            if(n&(1<<i)){
+                x = pow2Parent[i][x];
+            }
+        }
+
+        return x;
+    }
+
+    int findLCA(int x,int y){
+        if(depth[x] > depth[y]) swap(x,y);
+
+        y = NthParent(y,depth[y]-depth[x]);
+        if(x == y) return x;
+
+        for(int i=31;i>=0;i--){
+            int xNthParent = NthParent(x,i);
+            int yNthParent = NthParent(y,i);
+            if(xNthParent != yNthParent){
+                x = xNthParent;
+                y = yNthParent;
+            }
+        }
+
+        return pow2Parent[0][x];
+    }
+    
+    int findDistance(int x,int y){
+        int lca = findLCA(x,y);
+        return depth[x] + depth[y] - 2*depth[lca];
+    }
+};
