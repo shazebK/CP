@@ -1,0 +1,29 @@
+const long long MOD = 1e9 + 7;
+
+long long powMod(long long x,long long n){
+  if(n == 0LL) return 1LL;
+  long long res = powMod(x,n/2);
+  (res*=res)%=MOD;
+  if(n&1LL) (res*=x)%=MOD;
+  return res;
+}
+
+class Counting{
+  public:
+  const int maxN = 1e5 + 1;
+  vector<long long> fact,invFact;
+
+  Counting(){
+    fact = vector<long long>(maxN),invFact = vector<long long>(maxN);
+    fact[0] = invFact[0] = 1;
+    for(int i=1;i<maxN;i++){
+      fact[i] = (fact[i-1]*i)%MOD;
+      invFact[i] = powMod(fact[i],MOD-2);
+    }
+  }
+
+  long long nCr(long long n,long long r){
+    if(n < r) return 0LL;
+    return (((fact[n]*invFact[n-r])%MOD)*invFact[r])%MOD;
+  }
+};
