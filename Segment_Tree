@@ -3,6 +3,7 @@ class SegmentTree{
     int n;
     vector<long long> segTree;
     vector<long long> lazy;
+    vector<int> assignment;
 
     SegmentTree(vector<long long> a){
         n = a.size();
@@ -13,6 +14,7 @@ class SegmentTree{
 
         segTree = vector<long long>(2*n);
         lazy = vector<long long>(2*n,0);
+        assignment = vector<int>(2*n,0);
 
         for(int i=n;i<2*n;i++) segTree[i] = a[i-n];
 
@@ -22,23 +24,40 @@ class SegmentTree{
     }
 
     void propogate(int node,int nl,int nr){
-        segTree[node] = segTree[node] + lazy[node]*(nr - nl + 1); //Operation Specific
-
+        if(assignment[node]){
+            segTree[node] = (nr - nl + 1)*lazy[node]; //Operation Specific
+        }
+        else{
+            segTree[node] = segTree[node] + lazy[node]*(nr - nl + 1); //Operation Specific
+        }
+        
         if(nl == nr){
             lazy[node] = 0;
+            assignment[node] = 0;
             return ;
         }
 
-        lazy[2*node]+=lazy[node];
-        lazy[2*node + 1]+=lazy[node];
+        if(assignment[node]){
+            lazy[2*node] = lazy[node];
+            lazy[2*node + 1] = lazy[node];
+            assignment[2*node] = 1;
+            assignment[2*node + 1] = 1;
+        }
+        else{
+            lazy[2*node]+=lazy[node];
+            lazy[2*node + 1]+=lazy[node];
+        }
+
         lazy[node] = 0;
+        assignment[node] = 0;
     }
 
-    void update(int node,int nl,int nr,int ql,int qr,long long increment){
+    void update(int node,int nl,int nr,int ql,int qr,long long x,int assignFlag = 0){
         propogate(node,nl,nr);      
 
         if(nl >= ql && nr <= qr){
-            lazy[node]+=increment;
+            assignment[node] = assignFlag;
+            lazy[node]+=x;
             propogate(node,nl,nr);  
             return ;
         }
@@ -49,8 +68,8 @@ class SegmentTree{
 
         int mid = (nl + nr)>>1;
 
-        update(2*node,nl,mid,ql,qr,increment);
-        update(2*node + 1,mid+1,nr,ql,qr,increment);
+        update(2*node,nl,mid,ql,qr,x,assignFlag);
+        update(2*node + 1,mid+1,nr,ql,qr,x,assignFlag);
 
         segTree[node] = segTree[2*node] + segTree[2*node + 1]; //Operation Specific
     }
@@ -75,11 +94,15 @@ class SegmentTree{
         return query(1,0,n-1,l,r);
     }
 
-    void update(int index,long long increment){
-        update(1,0,n-1,index,index,increment);
+    void update(int index,long long x){
+        update(1,0,n-1,index,index,x);
     }
 
-    void rangeUpdate(int l,int r,long long increment){
-        update(1,0,n-1,l,r,increment);
+    void updateRange(int l,int r,long long x){
+        update(1,0,n-1,l,r,x);
+    }
+
+    void assignRange(int l,int r,long long x){
+        update(1,0,n-1,l,r,x,1);
     }
 };
