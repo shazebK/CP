@@ -1,0 +1,85 @@
+class SegmentTree{
+    public:
+    int n;
+    vector<long long> segTree;
+    vector<long long> lazy;
+
+    SegmentTree(vector<long long> a){
+        n = a.size();
+        while(__builtin_popcount(n) > 1){
+            a.push_back(0LL);
+            n++;
+        }
+
+        segTree = vector<long long>(2*n);
+        lazy = vector<long long>(2*n,0);
+
+        for(int i=n;i<2*n;i++) segTree[i] = a[i-n];
+
+        for(int i=n-1;i>=1;i--){
+            segTree[i] = segTree[2*i] + segTree[2*i + 1]; //Operation Specific
+        }
+    }
+
+    void propogate(int node,int nl,int nr){
+        segTree[node] = segTree[node] + lazy[node]*(nr - nl + 1); //Operation Specific
+
+        if(nl == nr){
+            lazy[node] = 0;
+            return ;
+        }
+
+        lazy[2*node]+=lazy[node];
+        lazy[2*node + 1]+=lazy[node];
+        lazy[node] = 0;
+    }
+
+    void update(int node,int nl,int nr,int ql,int qr,long long increment){
+        propogate(node,nl,nr);      
+
+        if(nl >= ql && nr <= qr){
+            lazy[node]+=increment;
+            propogate(node,nl,nr);  
+            return ;
+        }
+
+        if(nl > qr || nr < ql){
+            return ;
+        }
+
+        int mid = (nl + nr)>>1;
+
+        update(2*node,nl,mid,ql,qr,increment);
+        update(2*node + 1,mid+1,nr,ql,qr,increment);
+
+        segTree[node] = segTree[2*node] + segTree[2*node + 1]; //Operation Specific
+    }
+
+    long long query(int node,int nl,int nr,int ql,int qr){
+        propogate(node,nl,nr);
+
+        if(nl >= ql && nr <= qr){
+            return segTree[node];
+        }
+
+        if(nl > qr || nr < ql){
+            return 0; //Operation Specific
+        }
+
+        int mid = (nl + nr)>>1;
+
+        return query(2*node,nl,mid,ql,qr) + query(2*node + 1,mid+1,nr,ql,qr); //Operation Specific
+    }
+
+    long long query(int l,int r){
+        return query(1,0,n-1,l,r);
+    }
+
+    void update(int index,long long increment){
+        update(1,0,n-1,index,index,increment);
+    }
+
+    void rangeUpdate(int l,int r,long long increment){
+        update(1,0,n-1,l,r,increment);
+    }
+};
