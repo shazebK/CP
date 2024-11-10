@@ -1,0 +1,33 @@
+class SparseTable{
+    public: 
+    int LOGN;
+    vector<vector<long long>> sparseTab;
+    vector<int> Log2;
+
+    SparseTable(vector<long long> a){
+        int n = a.size();
+
+        Log2 = vector<int>(n+1);
+        Log2[1] = 0;
+        for(int i=2;i<=n;i++) Log2[i] = 1 + Log2[i/2];
+
+        LOGN = Log2[n];
+        sparseTab = vector<vector<long long>>(LOGN+1,vector<long long>(n));
+
+        for(int i=0;i<n;i++){
+            sparseTab[0][i] = a[i];
+        }
+
+        for(int i=1;i<=LOGN;i++){
+            int limit = n - (1<<i);
+            for(int j=0;j<=limit;j++){
+                sparseTab[i][j] = sparseTab[i-1][j] | sparseTab[i-1][j + (1<<(i-1))]; //Operation Specific
+            }
+        }
+    }
+
+    long long query(int l,int r){
+        int nearestPow2 = Log2[r-l+1];
+        return sparseTab[nearestPow2][l] | sparseTab[nearestPow2][r-(1<<nearestPow2)+1]; //Operation Specific
+    }
+};
