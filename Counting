@@ -10,10 +10,12 @@ long long powMod(long long x,long long n){
 
 class Counting{
   public:
-  const int maxN = 1e5 + 1;
+  int maxN;
   vector<long long> fact,invFact;
 
-  Counting(){
+  Counting(int mxn = 1e6){
+    this->maxN = mxn + 1;
+
     fact = vector<long long>(maxN),invFact = vector<long long>(maxN);
     fact[0] = invFact[0] = 1;
     for(int i=1;i<maxN;i++){
